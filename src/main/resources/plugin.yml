@@ -1,0 +1,9 @@
+name: LootTables
+version: ${project.version}
+main: me.dkflab.loottables.LootTables
+api-version: 1.18
+commands:
+  loottable:
+    usage: /<command>
+    permission: loottable.admin
+    aliases: [lt]
