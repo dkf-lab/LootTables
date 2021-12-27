@@ -180,7 +180,14 @@ public class Commands implements CommandExecutor {
                     List<String> idList = new ArrayList<>(map.keySet());
                     for (int i = 0; i < quantity; i++) {
                         // choose random item
-                        String randomId = (String) collection.next();
+                        // check if items have weight
+                        String randomId;
+                        if (!main.lootTableContainsWeights(args[2])) {
+                            Random rand = new Random();
+                            randomId = idList.get(rand.nextInt(idList.size()));
+                        } else {
+                            randomId = (String) collection.next();
+                        }
                         // ADD ITEM TO INV
                         p.getInventory().addItem(map.get(randomId));
                         // COMMANDS

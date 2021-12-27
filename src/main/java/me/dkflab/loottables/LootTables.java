@@ -24,6 +24,17 @@ public final class LootTables extends JavaPlugin {
         saveConfig();
     }
 
+    public boolean lootTableContainsWeights(String lootTable) {
+        // does the loot table have percentages??
+        Set<String> list = getItemsFromTable(lootTable).keySet();
+        for (String s : list) {
+            if (getPercentage(s) == 0) {
+                return false; // no percentages
+            }
+        }
+        return true;
+    }
+
     public void addItemToLootTable(String itemID, String lootTable) {
         ConfigurationSection sec = getConfig().getConfigurationSection("loottables");
         if (sec == null) {
