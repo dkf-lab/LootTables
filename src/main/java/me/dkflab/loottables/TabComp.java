@@ -23,17 +23,22 @@ public class TabComp implements TabCompleter {
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
         if (arguments.isEmpty()) {
             arguments.add("help");
-            arguments.add("additem");
+            arguments.add("item");
             arguments.add("give");
             arguments.add("cmd");
+            arguments.add("table");
+            arguments.add("list");
+            arguments.add("weight");
         }
         List<String> result = new ArrayList<String>();
+        // Command override
         if (args.length >= 3) {
             if (args[0].equalsIgnoreCase("cmd")) {
                 result.add("<command>");
                 return result;
             }
         }
+        // Automatic
         if (args.length == 1) {
             for (String a : arguments) {
                 if (a.toLowerCase().startsWith(args[0].toLowerCase())) {
@@ -44,8 +49,23 @@ public class TabComp implements TabCompleter {
         }
         if (args.length == 2) {
             String s = args[0];
-            if (s.equalsIgnoreCase("additem")) {
-                result.add("<id>");
+            if (s.equalsIgnoreCase("weight")) {
+                result.addAll(main.itemsList());
+                if (result.isEmpty()) {
+                    result.add("<id>");
+                }
+            }
+            if (s.equalsIgnoreCase("table")) {
+                result.add("create");
+                result.add("remove");
+            }
+            if (s.equalsIgnoreCase("list")) {
+                result.add("tables");
+                result.add("items");
+            }
+            if (s.equalsIgnoreCase("item")) {
+                result.add("add");
+                result.add("remove");
             }
             if (s.equalsIgnoreCase("give")) {
                 for (Player all : Bukkit.getOnlinePlayers()) {
@@ -53,31 +73,35 @@ public class TabComp implements TabCompleter {
                 }
             }
             if (s.equalsIgnoreCase("cmd")) {
-                try {
-                    result.addAll(main.getConfig().getConfigurationSection("items").getKeys(false));
-                } catch (Exception e) {
+                result.addAll(main.itemsList());
+                if (result.isEmpty()) {
                     result.add("<id>");
                 }
             }
             return result;
         }
         if (args.length == 3) {
-            if (args[0].equalsIgnoreCase("additem")) {
-                try {
-                    result.addAll(main.getConfig().getConfigurationSection("loottables").getKeys(false));
-                } catch (Exception ignored) {
-                    Bukkit.getLogger().warning("Loot tables configuration section is empty");
+            if (args[0].equalsIgnoreCase("weight")) {
+                for (int i = 0; i < 101; i++) {
+                    result.add(""+i);
+                }
+            }
+            if (args[0].equalsIgnoreCase("item")) {
+                result.addAll(main.itemsList());
+                if (result.isEmpty()) {
+                    result.add("<id>");
+                }
+            }
+            if (args[0].equalsIgnoreCase("table")) {
+                if (args[1].equalsIgnoreCase("remove")) {
+                    result.addAll(main.tablesList());
                 }
                 if (result.isEmpty()) {
-                    result.add("<table>");
+                    result.add("<id>");
                 }
             }
             if (args[0].equalsIgnoreCase("give")) {
-                try {
-                    result.addAll(main.getConfig().getConfigurationSection("loottables").getKeys(false));
-                } catch (Exception ignored) {
-                    Bukkit.getLogger().warning("Loot tables configuration section is empty");
-                }
+                result.addAll(main.tablesList());
                 if (result.isEmpty()) {
                     result.add("<table>");
                 }
@@ -88,6 +112,15 @@ public class TabComp implements TabCompleter {
             if (args[0].equals("give")) {
                 for (int i = 0; i < 10; i++) {
                     result.add(""+i);
+                }
+            }
+            if (args[0].equalsIgnoreCase("item")) {
+                if (args[1].equalsIgnoreCase("remove")) {
+                    return result;
+                }
+                result.addAll(main.tablesList());
+                if (result.isEmpty()) {
+                    result.add("<table>");
                 }
             }
             return result;

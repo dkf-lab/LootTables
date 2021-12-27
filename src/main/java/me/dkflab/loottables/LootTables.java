@@ -8,10 +8,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.PreparedStatement;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public final class LootTables extends JavaPlugin {
 
@@ -37,6 +34,58 @@ public final class LootTables extends JavaPlugin {
             sec.set(lootTable,list);
         }
         saveConfig();
+    }
+
+    public List<String> itemsList() {
+        List<String> list = new ArrayList<>();
+        try {
+           list.addAll(getConfig().getConfigurationSection("items").getKeys(false));
+        } catch (Exception ignored) {
+
+        }
+        return list;
+    }
+
+    public boolean itemExists(String itemID) {
+        return itemsList().contains(itemID);
+    }
+
+    public boolean tableExists(String tableID) {
+        return tablesList().contains(tableID);
+    }
+
+    public int getPercentage(String itemID) {
+        int percentage = 0;
+        if (itemExists(itemID)) {
+            try {
+                percentage = getConfig().getConfigurationSection("weight").getInt(itemID);
+            } catch (Exception ignored) { }
+        }
+        return percentage;
+    }
+
+    public void setPercentage(String itemID, int percentage) {
+        getConfig().set("weight." + itemID, percentage);
+        saveConfig();
+    }
+
+    public List<String> tablesList() {
+        List<String> list = new ArrayList<>();
+        try {
+           list.addAll(getConfig().getConfigurationSection("loottables").getKeys(false));
+        } catch (Exception ignored) {
+
+        }
+        return list;
+    }
+
+    public boolean percentagesAddUpTo100(Set<String> set) {
+        // presuming Set<String> is a set of item ids
+        int chance = 0;
+        for (String s : set) {
+            chance += getPercentage(s);
+        }
+        return chance == 100;
     }
 
     public HashMap<String, ItemStack> getItemsFromTable(String id) {
