@@ -185,6 +185,9 @@ public class Commands implements CommandExecutor {
                         if (!main.lootTableContainsWeights(args[2])) {
                             Random rand = new Random();
                             randomId = idList.get(rand.nextInt(idList.size()));
+                            if (!main.percentagesAddUpTo100(map.keySet())) {
+                                sendMessage(sender, "&c&lWARNING! &7Your percentages do not add up to &e100%&7!");
+                            }
                         } else {
                             randomId = (String) collection.next();
                         }
@@ -200,9 +203,6 @@ public class Commands implements CommandExecutor {
                         }
                     }
                     sendMessage(sender, "&a&lSuccess! &7Given item to &e" + p.getName());
-                    if (!main.percentagesAddUpTo100(map.keySet())) {
-                        sendMessage(sender, "&c&lWARNING! &7Your percentages do not add up to &e100%&7!");
-                    }
                     return true;
                 }
                 if (args[0].equalsIgnoreCase("item")) {
