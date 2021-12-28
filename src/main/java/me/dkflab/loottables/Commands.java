@@ -71,9 +71,9 @@ public class Commands implements CommandExecutor {
                         if (list.isEmpty()) {
                             sendMessage(sender, "&c&lError! &7No tables found.");
                         } else {
-                            sendMessage(sender, "&a&lList of tables:");
+                            sendMessage(sender, "&a&lList of Tables:");
                             for (String s : list) {
-                                sendMessage(sender, "&7 - " + s);
+                                sendMessage(sender, "&f - " + s);
                             }
                         }
                     } else if (args[1].equalsIgnoreCase("items")) {
@@ -86,9 +86,27 @@ public class Commands implements CommandExecutor {
                         if (list.isEmpty()) {
                             sendMessage(sender, "&c&lError! &7No items found.");
                         } else {
-                            sendMessage(sender, "&a&lList of items:");
+                            sendMessage(sender, "&a&lList of Items:");
                             for (String s : list) {
-                                sendMessage(sender, "&7 - " + s);
+                                sendMessage(sender, "&f - " + s);
+                            }
+                        }
+                    } else if (args[1].equalsIgnoreCase("all")) {
+                        List<String> list = new ArrayList<>();
+                        try {
+                            list.addAll(main.getConfig().getConfigurationSection("loottables").getKeys(false));
+                        } catch (Exception ignored) {
+
+                        }
+                        if (list.isEmpty()) {
+                            sendMessage(sender, "&c&lError! &7No tables found.");
+                        } else {
+                            sendMessage(sender, "&a&lList of Tables & Items:");
+                            for (String s : list) {
+                                sendMessage(sender, "&f - " + s);
+                                for (String item : main.getItemsFromTable(s).keySet()) {
+                                    sendMessage(sender, "&7  - " + item);
+                                }
                             }
                         }
                     } else {
@@ -137,6 +155,18 @@ public class Commands implements CommandExecutor {
                     main.setPercentage(itemID, percentage);
                     sendMessage(sender, "&a&lSuccess! &e" + itemID + "&7 has a percentage weight of &e" + percentage + "%&7!");
                     return true;
+                }
+                if (args[0].equalsIgnoreCase("item")) {
+                    if (args[1].equalsIgnoreCase("remove")) {
+                        String itemID = args[2];
+                        if (main.itemsList().contains(itemID)) {
+                            main.removeItemFromConfig(itemID);
+                            sendMessage(sender, "&a&lSuccess! &7Item ID &e" + itemID + " &7has been removed.");
+                        } else {
+                            sendMessage(sender, "&c&lError! &e" + itemID + "&7 does not exist.");
+                        }
+                        return true;
+                    }
                 }
             }
             if (args.length == 4) {
@@ -228,8 +258,7 @@ public class Commands implements CommandExecutor {
                     if (args[1].equalsIgnoreCase("remove")) {
                         String itemID = args[2];
                         if (main.itemsList().contains(itemID)) {
-                            main.getConfig().set("items." + itemID, null);
-                            main.saveConfig();
+                            main.removeItemFromConfig(itemID);
                             sendMessage(sender, "&a&lSuccess! &7Item ID &e" + itemID + " &7has been removed.");
                         } else {
                             sendMessage(sender, "&c&lError! &e" + itemID + "&7 does not exist.");
@@ -249,7 +278,7 @@ public class Commands implements CommandExecutor {
         sendMessage(sender, "&8/lt &egive <player> <table> <quantity> &7- Gives players items from loot table.");
         sendMessage(sender, "&8/lt &etable <create | remove> <id> &7- Creates a loot table");
         sendMessage(sender, "&8/lt &ecmd <id> <command> &7- Add command to item. Use %player% to reference player.");
-        sendMessage(sender, "&8/lt &elist <table | items> &7- List current tables and items in the config.");
+        sendMessage(sender, "&8/lt &elist <table | items | all> &7- List current tables and items in the config.");
         sendMessage(sender, "&8/lt &eweight <id> <percentage> &7- Set percentage chance of getting an item.");
     }
 }

@@ -35,6 +35,31 @@ public final class LootTables extends JavaPlugin {
         return true;
     }
 
+    public void removeItemFromConfig(String itemID) {
+        // remove item from loot tables
+        ConfigurationSection sec = getConfig().getConfigurationSection("loottables");
+        if (sec != null) {
+            String tableList = getLootTableFromItem(itemID);
+            if (tableList != null) {
+                List<String> list = sec.getStringList(tableList);
+                list.remove(itemID);
+                sec.set(tableList,list);
+            }
+        }
+        // remove item from item list
+        getConfig().set("items." + itemID, null);
+        saveConfig();
+    }
+
+    public String getLootTableFromItem(String itemID) {
+        for (String table : tablesList()) {
+            if (getItemsFromTable(table).containsKey(itemID)) {
+                return table;
+            }
+        }
+        return null;
+    }
+
     public void addItemToLootTable(String itemID, String lootTable) {
         ConfigurationSection sec = getConfig().getConfigurationSection("loottables");
         if (sec == null) {

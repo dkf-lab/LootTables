@@ -62,6 +62,7 @@ public class TabComp implements TabCompleter {
             if (s.equalsIgnoreCase("list")) {
                 result.add("tables");
                 result.add("items");
+                result.add("all");
             }
             if (s.equalsIgnoreCase("item")) {
                 result.add("add");
