@@ -19,6 +19,16 @@ public final class LootTables extends JavaPlugin {
         getCommand("loottable").setTabCompleter(new TabComp(this));
     }
 
+    public void removeCommandFromItem(String itemID) {
+        getConfig().set("commands." + itemID, null);
+        saveConfig();
+    }
+
+    public void removeWeightFromItem(String tableID, String itemID) {
+        getConfig().set("weight." + tableID + "." + itemID, null);
+        saveConfig();
+    }
+
     public void addItemToConfig(@NotNull String itemID, @NotNull ItemStack item) {
         getConfig().set("items." + itemID, item);
         saveConfig();
@@ -28,7 +38,7 @@ public final class LootTables extends JavaPlugin {
         // does the loot table have percentages??
         Set<String> list = getItemsFromTable(lootTable).keySet();
         for (String s : list) {
-            if (getPercentage(s) == 0) {
+            if (getPercentage(lootTable, s) == 0) {
                 return false; // no percentages
             }
         }
@@ -90,18 +100,18 @@ public final class LootTables extends JavaPlugin {
         return tablesList().contains(tableID);
     }
 
-    public int getPercentage(String itemID) {
+    public int getPercentage(String tableID, String itemID) {
         int percentage = 0;
         if (itemExists(itemID)) {
             try {
-                percentage = getConfig().getConfigurationSection("weight").getInt(itemID);
+                percentage = getConfig().getInt("weight." + tableID + "." + itemID);
             } catch (Exception ignored) { }
         }
         return percentage;
     }
 
-    public void setPercentage(String itemID, int percentage) {
-        getConfig().set("weight." + itemID, percentage);
+    public void setPercentage(String tableID, String itemID, int percentage) {
+        getConfig().set("weight." + tableID + "." + itemID, percentage);
         saveConfig();
     }
 
@@ -115,11 +125,10 @@ public final class LootTables extends JavaPlugin {
         return list;
     }
 
-    public boolean percentagesAddUpTo100(Set<String> set) {
-        // presuming Set<String> is a set of item ids
+    public boolean percentagesAddUpTo100(String tableID) {
         int chance = 0;
-        for (String s : set) {
-            chance += getPercentage(s);
+        for (String item : getItemsFromTable(tableID).keySet()) {
+            chance += getPercentage(tableID, item);
         }
         return chance == 100;
     }

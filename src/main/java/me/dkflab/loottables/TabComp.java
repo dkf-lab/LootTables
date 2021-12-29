@@ -32,7 +32,7 @@ public class TabComp implements TabCompleter {
         }
         List<String> result = new ArrayList<String>();
         // Command override
-        if (args.length >= 3) {
+        if (args.length >= 4) {
             if (args[0].equalsIgnoreCase("cmd")) {
                 result.add("<command>");
                 return result;
@@ -50,10 +50,8 @@ public class TabComp implements TabCompleter {
         if (args.length == 2) {
             String s = args[0];
             if (s.equalsIgnoreCase("weight")) {
-                result.addAll(main.itemsList());
-                if (result.isEmpty()) {
-                    result.add("<id>");
-                }
+                result.add("add");
+                result.add("remove");
             }
             if (s.equalsIgnoreCase("table")) {
                 result.add("create");
@@ -74,17 +72,22 @@ public class TabComp implements TabCompleter {
                 }
             }
             if (s.equalsIgnoreCase("cmd")) {
+                result.add("add");
+                result.add("remove");
+            }
+            return result;
+        }
+        if (args.length == 3) {
+            if (args[0].equalsIgnoreCase("cmd")) {
                 result.addAll(main.itemsList());
                 if (result.isEmpty()) {
                     result.add("<id>");
                 }
             }
-            return result;
-        }
-        if (args.length == 3) {
             if (args[0].equalsIgnoreCase("weight")) {
-                for (int i = 0; i < 101; i++) {
-                    result.add(""+i);
+                result.addAll(main.tablesList());
+                if (result.isEmpty()) {
+                    result.add("<table>");
                 }
             }
             if (args[0].equalsIgnoreCase("item")) {
@@ -110,7 +113,13 @@ public class TabComp implements TabCompleter {
             return result;
         }
         if (args.length == 4) {
-            if (args[0].equals("give")) {
+            if (args[0].equalsIgnoreCase("weight")) {
+                result.addAll(main.itemsList());
+                if (result.isEmpty()) {
+                    result.add("<id>");
+                }
+            }
+            if (args[0].equalsIgnoreCase("give")) {
                 for (int i = 0; i < 10; i++) {
                     result.add(""+i);
                 }
@@ -125,6 +134,13 @@ public class TabComp implements TabCompleter {
                 }
             }
             return result;
+        }
+        if (args.length == 5) {
+            if (args[0].equalsIgnoreCase("weight")) {
+                for (int i = 0; i < 101; i++) {
+                    result.add(""+i);
+                }
+            }
         }
         return null;
     }

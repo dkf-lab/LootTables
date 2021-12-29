@@ -34,28 +34,35 @@ public class Commands implements CommandExecutor {
                         help(sender);
                         return true;
                     } else {
-                        String id = args[1];
-                        try {
-                            if (!main.getConfig().getConfigurationSection("items").contains(id)) {
-                                sendMessage(sender, "&c&lError! &e" + id + "&7 is an invalid ID.");
-                                return true;
-                            }
-                        } catch (Exception e) {
-                            sendMessage(sender, "&c&lError! &e" + id + "&7 is an invalid ID.");
+                        String itemID = args[2];
+                        if (!main.itemExists(itemID)) {
+                            sendMessage(sender, "&c&LError! &e" + itemID + " &7does not exist.");
                             return true;
                         }
-                        // args parsed
-                        StringBuilder s = new StringBuilder();
-                        for (int i = 2; i < args.length; i++) {
-                            if (i == 2) {
-                                s.append(args[i]);
-                            } else {
-                                s.append(" " + args[i]);
+                        if (args[1].equalsIgnoreCase("add")) {
+                            if (args.length <= 3) {
+                                help(sender);
+                                return true;
                             }
+                            StringBuilder s = new StringBuilder();
+                            for (int i = 3; i < args.length; i++) {
+                                if (i == 3) {
+                                    s.append(args[i]);
+                                } else {
+                                    s.append(" " + args[i]);
+                                }
+                            }
+                            main.setCommandOfItem(itemID,s.toString());
+                            sendMessage(sender,"&a&lSuccess! &7Added command &e" +s+ "&7 to item &e" + itemID + "&7!");
+                            return true;
+                        } else if (args[1].equalsIgnoreCase("remove")) {
+                            main.removeCommandFromItem(itemID);
+                            sendMessage(sender,"&a&lSuccess! &7Removed command from item &e" + itemID + "&7.");
+                            return true;
+                        } else {
+                            help(sender);
+                            return true;
                         }
-                        main.setCommandOfItem(id,s.toString());
-                        sendMessage(sender,"&a&lSuccess! &7Added command &e" +s+ "&7 to item &e" + id + "&7!");
-                        return true;
                     }
                 }
             }
@@ -116,7 +123,6 @@ public class Commands implements CommandExecutor {
                 }
             }
             if (args.length == 3) {
-                // TABLE
                 if (args[0].equalsIgnoreCase("table")) {
                     if (args[1].equalsIgnoreCase("remove")) {
                         try {
@@ -136,24 +142,6 @@ public class Commands implements CommandExecutor {
                     } else {
                         help(sender);
                     }
-                    return true;
-                }
-                if (args[0].equalsIgnoreCase("weight")) {
-                    String itemID = args[1];
-                    if (!main.itemExists(itemID)) {
-                        sendMessage(sender, "&c&LError! &e" + itemID + " &7does not exist.");
-                        return true;
-                    }
-                    int percentage;
-                    try {
-                        percentage = Integer.parseInt(args[2]);
-                    } catch (NumberFormatException e) {
-                        sendMessage(sender, "&c&LError! &e" + args[2] +"&7 is not an integer.");
-                        return true;
-                    }
-                    // all variables parsed
-                    main.setPercentage(itemID, percentage);
-                    sendMessage(sender, "&a&lSuccess! &e" + itemID + "&7 has a percentage weight of &e" + percentage + "%&7!");
                     return true;
                 }
                 if (args[0].equalsIgnoreCase("item")) {
@@ -204,7 +192,7 @@ public class Commands implements CommandExecutor {
                     }
                     RandomCollection collection = new RandomCollection<>();
                     for (String s : map.keySet()) {
-                        collection = collection.add(main.getPercentage(s),s);
+                        collection = collection.add(main.getPercentage(args[2],s),s);
                     }
                     // all args parsed
                     List<String> idList = new ArrayList<>(map.keySet());
@@ -212,14 +200,14 @@ public class Commands implements CommandExecutor {
                         // choose random item
                         // check if items have weight
                         String randomId;
-                        if (!main.lootTableContainsWeights(args[2])) {
-                            Random rand = new Random();
-                            randomId = idList.get(rand.nextInt(idList.size()));
-                            if (!main.percentagesAddUpTo100(map.keySet())) {
+                        if (main.lootTableContainsWeights(args[2])) {
+                            randomId = (String) collection.next();
+                            if (!main.percentagesAddUpTo100(args[2])) {
                                 sendMessage(sender, "&c&lWARNING! &7Your percentages do not add up to &e100%&7!");
                             }
                         } else {
-                            randomId = (String) collection.next();
+                            Random rand = new Random();
+                            randomId = idList.get(rand.nextInt(idList.size()));
                         }
                         // ADD ITEM TO INV
                         p.getInventory().addItem(map.get(randomId));
@@ -265,6 +253,56 @@ public class Commands implements CommandExecutor {
                         }
                     }
                 }
+                if (args[0].equalsIgnoreCase("weight")) {
+                    // remove weight only
+                    if (!args[1].equalsIgnoreCase("remove")) {
+                        help(sender);
+                        return true;
+                    }
+                    String tableID = args[2];
+                    String itemID = args[3];
+                    if (!main.tableExists(tableID)) {
+                        sendMessage(sender, "&c&LError! &e" + tableID + " &7does not exist.");
+                        return true;
+                    }
+                    if (!main.itemExists(itemID)) {
+                        sendMessage(sender, "&c&LError! &e" + itemID + " &7does not exist.");
+                        return true;
+                    }
+                    main.removeWeightFromItem(tableID,itemID);
+                    sendMessage(sender, "&a&lSuccess! &7Weight removed from table &e" + tableID + "&7 and item &e" + itemID + "&7.");
+                    return true;
+                }
+            }
+            if (args.length == 5) {
+                if (args[0].equalsIgnoreCase("weight")) {
+                    // add weight only
+                    String tableID = args[2];
+                    String itemID = args[3];
+                    if (!args[1].equalsIgnoreCase("add")) {
+                        help(sender);
+                        return true;
+                    }
+                    if (!main.tableExists(tableID)) {
+                        sendMessage(sender, "&c&LError! &e" + tableID + " &7does not exist.");
+                        return true;
+                    }
+                    if (!main.itemExists(itemID)) {
+                        sendMessage(sender, "&c&LError! &e" + itemID + " &7does not exist.");
+                        return true;
+                    }
+                    int percentage;
+                    try {
+                        percentage = Integer.parseInt(args[4]);
+                    } catch (NumberFormatException e) {
+                        sendMessage(sender, "&c&LError! &e" + args[4] +"&7 is not an integer.");
+                        return true;
+                    }
+                    // all variables parsed
+                    main.setPercentage(tableID, itemID, percentage);
+                    sendMessage(sender, "&a&lSuccess! &e" + itemID + "&7 has a percentage weight of &e" + percentage + "%&7!");
+                    return true;
+                }
             }
         }
         help(sender);
@@ -273,12 +311,11 @@ public class Commands implements CommandExecutor {
 
     private void help(CommandSender sender) {
         sendMessage(sender, "&aLootTables Help");
-        sendMessage(sender, "&8/lt &e<help | item | table | give | list | cmd | weight> &7- Base commands");
         sendMessage(sender, "&8/lt &eitem <add | remove> <id> <table> &7- Adds item to config under 'id' and adds to table");
         sendMessage(sender, "&8/lt &egive <player> <table> <quantity> &7- Gives players items from loot table.");
         sendMessage(sender, "&8/lt &etable <create | remove> <id> &7- Creates a loot table");
-        sendMessage(sender, "&8/lt &ecmd <id> <command> &7- Add command to item. Use %player% to reference player.");
+        sendMessage(sender, "&8/lt &ecmd <add | remove> <id> <command> &7- Add command to item. Use %player% to reference player.");
         sendMessage(sender, "&8/lt &elist <table | items | all> &7- List current tables and items in the config.");
-        sendMessage(sender, "&8/lt &eweight <id> <percentage> &7- Set percentage chance of getting an item.");
+        sendMessage(sender, "&8/lt &eweight <add | remove> <table> <id> <percentage> &7- Set percentage chance of getting an item.");
     }
 }
